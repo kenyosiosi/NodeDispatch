@@ -1,0 +1,66 @@
+# ------------------------------------------------------------------
+# NodeDispatch — .gitignore
+# ------------------------------------------------------------------
+
+# Directorios de construcción
+build/
+cmake-build-*/
+out/
+bin/
+obj/
+lib/
+_deps/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+compile_commands.json
+*.cmake.user
+
+# Artefactos compilados
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+
+# Pruebas y cobertura
+Testing/
+*.gcda
+*.gcno
+*.gcov
+coverage/
+*.profraw
+*.profdata
+
+# Datos generados (snapshots, logs, WAL opcional)
+data/
+*.log
+*.wal
+*.snapshot
+*.tmp
+
+# Entornos e IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.clangd/
+.cache/
+
+# Variables de entorno
+.env
+.env.*
