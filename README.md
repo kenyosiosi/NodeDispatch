@@ -10,9 +10,10 @@
 
 El repositorio ya cuenta con la especificación técnica corregida en
 [`docs/SDD.md`](docs/SDD.md), el esqueleto de carpetas, el `.gitignore`, el
-`CMakeLists.txt` con DeSiGNAR v4.0.1 vía `FetchContent` y el smoke test S1.0 que
+`CMakeLists.txt` con DeSiGNAR v4.0.1 vía `FetchContent`, el smoke test S1.0 que
 valida las cinco estructuras (`MTreeNode`, `TreeMap`/`RbTree`, `HashMap`,
-`DynHeap` y `DynArray`).
+`DynHeap` y `DynArray`) y el módulo **GeographicHierarchy (S2.1)** con su suite
+de pruebas.
 
 ## 👥 Autores
 
@@ -58,10 +59,13 @@ NodeDispatch/
 │       ├── types.hpp       # Enums, OperationResult y tipos de valor
 │       ├── agency.hpp      # Agency
 │       ├── client.hpp      # Client
-│       └── package.hpp     # Package, DispatchEntry, PackageEvent
-├── src/                    # Implementación C++ (.cpp) [Próximamente]
+│       ├── package.hpp     # Package, DispatchEntry, PackageEvent
+│       └── geographic_hierarchy.hpp  # Jerarquía de agencias (MTreeNode + HashMap)
+├── src/
+│   └── geographic_hierarchy.cpp      # S2.1: árbol N-ario e índice O(1)
 ├── tests/
-│   └── smoke_test.cpp      # S1.0: validación de las 5 estructuras DeSiGNAR
+│   ├── smoke_test.cpp      # S1.0: validación de las 5 estructuras DeSiGNAR
+│   └── hierarchy_test.cpp  # S2.1: casos de la jerarquía geográfica
 ├── third_party/            # Dependencias adicionales (DeSiGNAR vía FetchContent)
 ├── .gitignore
 ├── CMakeLists.txt          # DeSiGNAR v4.0.1 + targets del núcleo
@@ -86,6 +90,7 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 # o directamente:
 ./build/smoke_test
+./build/hierarchy_test
 ```
 
 El **smoke test S1.0** (`tests/smoke_test.cpp`) valida las cinco estructuras del
