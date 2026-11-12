@@ -39,8 +39,8 @@ FetchContent_MakeAvailable(Designar)
 # -----------------------------------------------------------------------------
 # Nucleo de NodeDispatch
 #
-# Por ahora es una libreria INTERFACE (solo cabeceras). A medida que se agreguen
-# modulos con .cpp, se transformara en STATIC y se listaran sus fuentes.
+# Libreria estatica con los modulos implementados. Las cabeceras publicas se
+# exponen a traves de `include/`.
 # -----------------------------------------------------------------------------
 
 # DeSiGNAR es codigo de terceros: sus cabeceras se tratan como "sistema" para
@@ -50,20 +50,21 @@ if(DEFINED designar_SOURCE_DIR)
         INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${designar_SOURCE_DIR}/include")
 endif()
 
-add_library(nodedispatch_core INTERFACE)
-target_include_directories(nodedispatch_core INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-target_compile_features(nodedispatch_core INTERFACE cxx_std_17)
-target_link_libraries(nodedispatch_core INTERFACE Designar::Designar)
-
-# Advertencias aplicadas solo a nuestros ejecutables, no a los consumidores.
 add_library(nodedispatch_warnings INTERFACE)
 if(MSVC)
     target_compile_options(nodedispatch_warnings INTERFACE /W4)
 else()
     target_compile_options(nodedispatch_warnings INTERFACE -Wall -Wextra -Wpedantic)
 endif()
+
+add_library(nodedispatch_core STATIC
+    src/geographic_hierarchy.cpp)
+target_include_directories(nodedispatch_core PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+target_compile_features(nodedispatch_core PUBLIC cxx_std_17)
+target_link_libraries(nodedispatch_core PUBLIC Designar::Designar)
+target_link_libraries(nodedispatch_core PRIVATE nodedispatch_warnings)
 
 # -----------------------------------------------------------------------------
 # Pruebas
@@ -74,4 +75,8 @@ if(BUILD_TESTING)
     add_executable(smoke_test tests/smoke_test.cpp)
     target_link_libraries(smoke_test PRIVATE nodedispatch_core nodedispatch_warnings)
     add_test(NAME smoke_test COMMAND smoke_test)
+
+    add_executable(hierarchy_test tests/hierarchy_test.cpp)
+    target_link_libraries(hierarchy_test PRIVATE nodedispatch_core nodedispatch_warnings)
+    add_test(NAME hierarchy_test COMMAND hierarchy_test)
 endif()
