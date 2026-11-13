@@ -101,8 +101,8 @@ set(DESIGNAR_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 
 La suite usa **doctest** (framework de cabecera única, fijado por `FetchContent`
 en `v2.5.3`, igual que DeSiGNAR). El ejecutable `nodedispatch_tests` agrupa los
-archivos `tests/*_test.cpp` y `ctest` registra un caso por cada `TEST_CASE`
-mediante `doctest_discover_tests`, con el prefijo `unit.`:
+archivos listados en el target `nodedispatch_tests` y `ctest` registra un caso
+por cada `TEST_CASE` mediante `doctest_discover_tests`, con el prefijo `unit.`:
 
 ```bash
 ctest --test-dir build --output-on-failure                 # suite completa
