@@ -74,6 +74,8 @@ if(BUILD_TESTING)
     # doctest: framework de cabecera unica para las pruebas del nucleo (SDD 9).
     # Se fija el tag, igual que DeSiGNAR, para que el build sea reproducible.
     set(DOCTEST_WITH_TESTS OFF CACHE BOOL "" FORCE)
+    set(DOCTEST_WITH_MAIN_IN_STATIC_LIB OFF CACHE BOOL "" FORCE)
+    set(DOCTEST_NO_INSTALL ON CACHE BOOL "" FORCE)
 
     FetchContent_Declare(doctest
         GIT_REPOSITORY https://github.com/doctest/doctest.git
