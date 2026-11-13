@@ -81,7 +81,8 @@ TEST_CASE("Package nace con los valores por defecto de la implementacion (S1.0)"
     CHECK(pkg.baseCents == 0);
     CHECK(pkg.deliverySurchargeCents == 0);
 
-    // SDD 5.2: el prepago es el modo por defecto y el pago arranca pendiente.
+    // Estado neutro previo al registro: un Package{} por defecto todavia no es
+    // un paquete valido. registerPackage aplica la regla del SDD 5.2.
     CHECK(pkg.paymentType == PaymentType::PREPAID);
     CHECK(pkg.paymentStatus == PaymentStatus::PENDING);
 
