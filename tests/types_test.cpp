@@ -2,7 +2,8 @@
 // NodeDispatch - S1.3 Invariantes de los tipos del dominio
 //
 // Fija por contrato lo que el SDD 4.1 define como enumeraciones del dominio y
-// los valores por defecto que el SDD 4.2 asigna a Package, Agency y Client.
+// los valores por defecto de la implementacion (S1.0) para Package, Agency y
+// Client. El SDD 4.2 solo declara los structs, no sus valores por defecto.
 //
 // Los enums se comprueban con static_assert: cualquier cambio de un valor
 // rompe la compilacion. Los valores por defecto se comprueban en tiempo de
@@ -67,7 +68,7 @@ static_assert(std::is_default_constructible<Client>::value,
 
 TEST_SUITE("dominio/types") {
 
-TEST_CASE("Package nace con los valores por defecto del SDD 4.2")
+TEST_CASE("Package nace con los valores por defecto de la implementacion (S1.0)")
 {
     const Package pkg;
 
