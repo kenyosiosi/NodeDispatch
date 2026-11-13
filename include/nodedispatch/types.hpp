@@ -30,6 +30,10 @@ enum class DeliveryMethod {
     HOME_DELIVERY    // Ultima milla (aplica recargo)
 };
 
+// Los valores numericos de ServiceLevel son invariantes: la cola de despacho
+// compara niveles con DispatchCmp (SDD 5.3), que ordena de menor a mayor. Si
+// EXPRESS_24H dejara de ser 1, el paquete mas urgente saldria al final sin que
+// el comparador cambie. Ver SDD 4.1 "Enumeraciones".
 enum class ServiceLevel {
     EXPRESS_24H = 1,
     PRIORITY    = 2,
