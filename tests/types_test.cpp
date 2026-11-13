@@ -24,7 +24,8 @@ using namespace nodedispatch;
 
 namespace {
 
-// --- SDD 4.1: los seis enums del dominio son enum class ----------------------
+// --- SDD 4.1 y OperationResult: los enum class de types.hpp ----------------
+// Los seis enums del SDD 4.1 mas OperationResult, que agrega la fachada.
 // Un enum class no se convierte implicitamente a entero; uno sin `class` si.
 template <typename T>
 constexpr bool isScopedEnum()
@@ -38,6 +39,7 @@ static_assert(isScopedEnum<DeliveryMethod>(), "DeliveryMethod debe ser enum clas
 static_assert(isScopedEnum<ServiceLevel>(), "ServiceLevel debe ser enum class");
 static_assert(isScopedEnum<PackageStatus>(), "PackageStatus debe ser enum class");
 static_assert(isScopedEnum<ReturnReason>(), "ReturnReason debe ser enum class");
+static_assert(isScopedEnum<OperationResult>(), "OperationResult debe ser enum class");
 
 // --- SDD 4.1 y 5.3: ServiceLevel vale 1, 2, 3 en ese orden -------------------
 // DispatchCmp compara los niveles por su valor entero, asi que el orden
