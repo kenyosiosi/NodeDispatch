@@ -95,7 +95,8 @@ if(BUILD_TESTING)
     # Suite principal: un solo ejecutable con todos los TEST_CASE del dominio.
     add_executable(nodedispatch_tests
         tests/doctest_main.cpp
-        tests/framework_test.cpp)
+        tests/framework_test.cpp
+        tests/types_test.cpp)
     target_link_libraries(nodedispatch_tests PRIVATE
         nodedispatch_core nodedispatch_warnings doctest::doctest)
 
