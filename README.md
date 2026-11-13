@@ -97,6 +97,20 @@ set(DESIGNAR_BUILD_TESTS   OFF CACHE BOOL "" FORCE)
 set(DESIGNAR_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 ```
 
+### 🧪 Pruebas
+
+La suite usa **doctest** (framework de cabecera única, fijado por `FetchContent`
+en `v2.5.3`, igual que DeSiGNAR). El ejecutable `nodedispatch_tests` agrupa los
+archivos `tests/*_test.cpp` y `ctest` registra un caso por cada `TEST_CASE`
+mediante `doctest_discover_tests`, con el prefijo `unit.`:
+
+```bash
+ctest --test-dir build --output-on-failure                 # suite completa
+ctest --test-dir build -R "^unit\." --output-on-failure    # solo doctest
+```
+
+El smoke test S1.0 (`smoke_test`) se mantiene como caso independiente de CTest.
+
 ## 🔄 Flujo de Trabajo Git (GitFlow)
 
 * **`main`**: rama estable de producción / entregas oficiales.
