@@ -71,6 +71,36 @@ endif()
 include(CTest)
 
 if(BUILD_TESTING)
+    # doctest: framework de cabecera unica para las pruebas del nucleo (SDD 9).
+    # Se fija el tag, igual que DeSiGNAR, para que el build sea reproducible.
+    set(DOCTEST_WITH_TESTS OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(doctest
+        GIT_REPOSITORY https://github.com/doctest/doctest.git
+        GIT_TAG        v2.5.3
+        GIT_PROGRESS   TRUE)
+
+    FetchContent_MakeAvailable(doctest)
+
+    # doctest es codigo de terceros: sus cabeceras se tratan como "sistema" para
+    # que sus propias advertencias no ensucien el build de NodeDispatch.
+    if(TARGET doctest)
+        set_target_properties(doctest PROPERTIES
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${doctest_SOURCE_DIR}")
+    endif()
+
+    # Suite principal: un solo ejecutable con todos los TEST_CASE del dominio.
+    add_executable(nodedispatch_tests
+        tests/doctest_main.cpp
+        tests/framework_test.cpp)
+    target_link_libraries(nodedispatch_tests PRIVATE
+        nodedispatch_core nodedispatch_warnings doctest::doctest)
+
+    # Un caso de CTest por cada TEST_CASE, con el prefijo "unit.".
+    include("${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake")
+    doctest_discover_tests(nodedispatch_tests TEST_PREFIX "unit.")
+
+    # S1.0: smoke test de las cinco estructuras de DeSiGNAR.
     add_executable(smoke_test tests/smoke_test.cpp)
     target_link_libraries(smoke_test PRIVATE nodedispatch_core nodedispatch_warnings)
     add_test(NAME smoke_test COMMAND smoke_test)
