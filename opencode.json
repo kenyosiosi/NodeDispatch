@@ -1,4 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [".opencode/rules/*.md"]
+  "instructions": [
+    ".opencode/rules/*.md"
+  ],
+  "mcp": {
+    "servers": {
+      "trello": {
+        "type": "remote",
+        "url": "https://mcp.trello.com/v1"
+      }
+    }
+  }
 }
