@@ -8,19 +8,33 @@ verdad y estas reglas lo resumen para trabajar rápido.
 
 ## 1. Entorno
 
-- El repositorio vive en **WSL** en `~/projects/NodeDispatch`. Desde Windows se
-  accede por `\\wsl.localhost\Ubuntu\home\keny\projects\NodeDispatch`.
-- Ejecuta build, tests y git **siempre dentro de WSL**:
+Esta sección describe **cómo trabaja Keny**, no un requisito del proyecto. El
+código, las reglas y los comandos son los mismos en cualquier máquina; lo que
+cambia es dónde están las herramientas.
 
-  ```bash
-  wsl.exe -d Ubuntu -- bash -lc "cd ~/projects/NodeDispatch && <comando>"
-  ```
+| Pieza | En la máquina de Keny | Qué ajusta cada uno |
+| :--- | :--- | :--- |
+| Repositorio | `~/projects/NodeDispatch` en WSL Ubuntu | La ruta local que prefiera |
+| Acceso desde Windows | `\\wsl.localhost\Ubuntu\home\keny\projects\NodeDispatch` | Nada: solo sirve para editar |
+| `cmake` | No está en el `PATH`; se usa el portable de `/tmp` o `~/.local/bin` | Instalarlo donde tenga (`sudo apt install cmake` funciona en otras máquinas) |
+| `sudo` | No disponible | No hace falta para compilar |
+| `gh` | Solo en Windows (`C:\Program Files\GitHub CLI\gh.exe`) | `gh` en Linux funciona igual |
 
-- `cmake` **no está en el PATH** de WSL. Usa `~/.local/bin/cmake` o el portable
-  `/tmp/cmake-3.30.5-linux-x86_64/bin/cmake` (el portable se borra al reiniciar
-  WSL; si falta, reinstálalo o usa `python3 -m pip install --user cmake`).
+Build, tests y git se ejecutan en **Linux** (en la máquina de Keny, dentro de
+WSL). El árbitro es el CI: Ubuntu + GCC. Si alguien compila en Windows nativo
+con MSVC, debe seguir pasando el CI, así que nada de código exclusivo de un
+compilador.
+
+Los comandos de la máquina de Keny, cuando `cmake` no está en el `PATH`:
+
+```bash
+wsl.exe -d Ubuntu -- bash -lc "cd ~/projects/NodeDispatch && <comando>"
+```
+
+- El portable `/tmp/cmake-3.30.5-linux-x86_64/bin/cmake` se borra al reiniciar
+  WSL; si falta, reinstálalo o usa `python3 -m pip install --user cmake`.
 - `gh` solo existe en Windows: `C:\Program Files\GitHub CLI\gh.exe`.
-- **No hay `sudo`.** Las herramientas de usuario se instalan con
+- Sin `sudo`, las herramientas de usuario se instalan con
   `python3 -m pip install --user cmake clang-format gcovr`.
 
 ## 2. Comandos
@@ -28,7 +42,7 @@ verdad y estas reglas lo resumen para trabajar rápido.
 | Tarea | Comando |
 | :--- | :--- |
 | Configurar | `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug` |
-| Compilar | `cmake --build build -j"$(nproc)"` |
+| Compilar | `cmake --build build --parallel` |
 | Probar todo | `ctest --test-dir build --output-on-failure` |
 | Solo doctest | `ctest --test-dir build -R "^unit\." --output-on-failure` |
 | Un caso | `ctest --test-dir build -R "<nombre del TEST_CASE>" --output-on-failure` |
@@ -93,10 +107,30 @@ Una tarea no está terminada hasta que:
 
 ## 7. Errores frecuentes en este repo
 
-- Compilar desde Windows con el toolchain de Visual Studio: **no**. Todo va por WSL.
-- Usar `cmake` del PATH: no existe. Usa la ruta explícita.
+- Compilar en Windows nativo con MSVC: permitido, pero el CI (GCC sobre Ubuntu)
+  es el árbitro. Nada de código exclusivo de un compilador.
+- En la máquina de Keny, `cmake` no está en el `PATH`: usa la ruta explícita.
+  En otras máquinas sí está; lo que no cambia es la versión mínima, 3.20.
 - Crear un `main()` nuevo para probar algo: usa `TEST_CASE` y CTest.
 - Devolver `Package*` desde el tracking "para no copiar": prohibido por contrato.
-- Poner `-Werror` global en CMake: rompe por warnings de DeSiGNAR. Si se usa,
-  solo en el target `nodedispatch_warnings`.
+- Poner `-Werror` global: solo en el target `nodedispatch_warnings`. Hoy las
+  cabeceras de DeSiGNAR se marcan como sistema
+  (`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES`), así que sus warnings no llegan; si
+  esa propiedad se pierde, `-Werror` rompe la build por código ajeno.
 - Confiar en que `/tmp/cmake-*` sigue ahí tras reiniciar WSL: no sigue.
+
+## 8. MCP de Trello en OpenCode
+
+`opencode.json` declara `mcp.servers.trello` como servidor **remoto**
+(Streamable HTTP contra `https://mcp.trello.com/v1`, el endpoint oficial de
+Trello). No ejecuta nada local ni instala paquetes.
+
+- La autenticación es **OAuth por persona**: cada uno autoriza su cuenta en el
+  navegador y elige workspace y permisos en la pantalla de consentimiento. Los
+  tokens los guarda OpenCode, nunca el repositorio (`.gitignore` cubre `.env*`).
+- Sin autorizar, el servidor aparece como *needs authentication* y no puede leer
+  ni escribir nada. No hace falta autenticarlo para compilar ni para testear.
+- Las tarjetas se pueden **archivar, no borrar**: el MCP no expone borrado
+  definitivo del tablero.
+- Si prefieres que no se conecte por defecto, añade `"disabled": true` dentro del
+  bloque `trello` y actívalo solo cuando lo uses.

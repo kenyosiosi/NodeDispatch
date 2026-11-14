@@ -30,6 +30,13 @@ Rechaza, sin excepción:
 
 Normaliza: `PREPAID => PAID`, `CASH_ON_DELIVERY => PENDING`.
 
+## Niveles de retorno
+
+Los códigos de arriba son `OperationResult` a nivel de **módulo de dominio**.
+La **fachada** del SDD §7 los traduce a `bool` (mutaciones) o `std::optional`
+(consultas) para no exponer detalles internos. Ninguna de las dos capas lanza
+excepciones de negocio.
+
 ## Finanzas
 
 `totalCents = baseCents + (HOME_DELIVERY ? deliverySurchargeCents : 0)`.

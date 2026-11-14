@@ -36,7 +36,7 @@ Nunca reportes "pasa" si no recompilaste después del último cambio. Primero
    ```bash
    cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \
      -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
-   cmake --build build-asan -j"$(nproc)"
+   cmake --build build-asan --parallel
    ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 \
    UBSAN_OPTIONS=halt_on_error=1 \
      ctest --test-dir build-asan --output-on-failure

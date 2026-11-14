@@ -45,6 +45,6 @@ Se ejecuta **antes de pedir revisión** de cualquier PR que toque `include/` o
 | Sin contenedores STL en `include/` y `src/` | sí |
 | Sin `double`/`float` fuera de `weightKg` | sí |
 | Sin `throw` en código de dominio | sí |
-| Test que cubre la regla COD | sí |
+| Test que cubre la regla COD | sí, desde S3.6 (antes sale `PENDIENTE` y no bloquea) |
 | `static_assert` de `ServiceLevel` intacto | sí |
 | Tabla de estados alineada con el SDD | sí |

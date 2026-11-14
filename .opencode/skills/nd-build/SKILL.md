@@ -28,7 +28,7 @@ description: Configura y compila NodeDispatch con CMake dentro de WSL, sin sudo,
 
    ```bash
    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-   cmake --build build -j"$(nproc)" 2>&1 | tee /tmp/nd-build.log
+   cmake --build build --parallel 2>&1 | tee /tmp/nd-build.log
    ```
 
 3. Filtra los warnings propios:
@@ -44,4 +44,6 @@ description: Configura y compila NodeDispatch con CMake dentro de WSL, sin sudo,
 
 - No borres `build/` sin avisar: se pierden los `_deps` y la reconfiguración
   tarda ~30 s.
-- No añadas `-Werror` global: DeSiGNAR rompería la build por sus propios warnings.
+- No añadas `-Werror` global: solo en `nodedispatch_warnings`. Las cabeceras de
+  DeSiGNAR se marcan como sistema, así que hoy no romperían la build; si esa
+  propiedad se pierde, cualquier warning ajeno pasa a ser un error.
