@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # El nombre del job es el que exige la proteccion de ramas:
+  # si se renombra, hay que actualizar el check requerido en GitHub.
+  build-and-test:
+    name: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Versiones del toolchain
+        run: |
+          cmake --version
+          g++ --version | head -n 1
+
+      # DeSiGNAR y doctest se bajan por FetchContent: la primera build tarda
+      # mas porque clona ambos repositorios. No se cachea build/_deps a
+      # proposito: un cache viejo de FetchContent falla de formas dificiles de
+      # diagnosticar y, con 4 semanas de proyecto, no compensa.
+      - name: Configurar
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Compilar
+        run: cmake --build build --parallel
+
+      - name: Probar
+        run: ctest --test-dir build --output-on-failure
