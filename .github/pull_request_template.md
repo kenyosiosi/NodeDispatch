@@ -13,7 +13,7 @@
 
 - [ ] `cmake --build build` sin warnings en `include/` ni en `src/`
 - [ ] `ctest --test-dir build --output-on-failure` verde
-- [ ] `bash scripts/check_domain.sh` OK (solo si toca `include/` o `src/`)
+- [ ] `bash scripts/check_domain.sh` OK (solo si toca `include/` o `src/` y el script ya existe en `development`)
 - [ ] ASan/UBSan limpio (solo si toca memoria)
 - [ ] `docs/SDD.md` actualizado (solo si cambio una firma publica)
 
