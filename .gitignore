@@ -64,3 +64,4 @@ Thumbs.db
 # Variables de entorno
 .env
 .env.*
+build-*/
