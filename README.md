@@ -1,5 +1,7 @@
 # NodeDispatch 📦🚛
 
+[![CI](https://github.com/kenyosiosi/NodeDispatch/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/kenyosiosi/NodeDispatch/actions/workflows/ci.yml)
+
 > **Core Engine de Logística y Distribución de Paquetes**
 >
 > *Proyecto para la asignatura Programación 3 — Universidad de Los Andes.*
