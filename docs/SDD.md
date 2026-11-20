@@ -368,6 +368,9 @@ La cola de cada agencia ordena por:
 
 1. `ServiceLevel`: `EXPRESS_24H` (1) antes que `PRIORITY` (2) antes que `STANDARD` (3).
 2. `createdAt`: el paquete más antiguo primero (desempate FIFO).
+3. `trackingCode`: desempate estable cuando el nivel y `createdAt` coinciden. Hace el
+   orden total, de modo que el heap sea reproducible sin depender del orden de
+   inserción.
 
 ```cpp
 struct DispatchCmp {
@@ -375,7 +378,9 @@ struct DispatchCmp {
     bool operator()(const DispatchEntry& a, const DispatchEntry& b) const {
         if (a.level != b.level)
             return static_cast<int>(a.level) < static_cast<int>(b.level);
-        return a.createdAt < b.createdAt;
+        if (a.createdAt != b.createdAt)
+            return a.createdAt < b.createdAt;
+        return a.trackingCode < b.trackingCode;
     }
 };
 ```
