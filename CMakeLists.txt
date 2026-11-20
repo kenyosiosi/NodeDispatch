@@ -98,6 +98,7 @@ if(BUILD_TESTING)
         tests/doctest_main.cpp
         tests/dispatch_cmp_test.cpp
         tests/framework_test.cpp
+        tests/facade_test.cpp
         tests/types_test.cpp)
     target_link_libraries(nodedispatch_tests PRIVATE
         nodedispatch_core nodedispatch_warnings doctest::doctest)
