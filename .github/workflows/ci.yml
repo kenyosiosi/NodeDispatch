@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # El nombre del job es el que exige la proteccion de ramas:
+  # si se renombra, hay que actualizar el check requerido en GitHub.
+  #
+  # `ubuntu-24.04` va fijado a proposito: con `ubuntu-latest` GitHub puede
+  # cambiar de imagen (y de GCC y de CMake) sin que toquemos el repo. Esta imagen
+  # trae GCC 12/13/14 y `g++` apunta a 13.3.0, que es el compilador que valida el
+  # CI. Los revisores pueden usar uno mas nuevo; el codigo es C++17, asi que 13
+  # es el piso. Si se necesita otro compilador, se cambia aqui y se documenta.
+  build-and-test:
+    name: build-and-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      # El job no hace push: no dejar credenciales en el checkout.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Versiones del toolchain
+        run: |
+          cmake --version
+          g++ --version | head -n 1
+
+      # DeSiGNAR y doctest se bajan por FetchContent: la primera build tarda
+      # mas porque clona ambos repositorios. No se cachea build/_deps a
+      # proposito: un cache viejo de FetchContent falla de formas dificiles de
+      # diagnosticar y, con 4 semanas de proyecto, no compensa.
+      - name: Configurar
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Compilar
+        run: cmake --build build --parallel
+
+      - name: Probar
+        run: ctest --test-dir build --output-on-failure
