@@ -11,6 +11,8 @@
 // constexpr en C++17 y por lo tanto no puede aparecer en un static_assert.
 // -----------------------------------------------------------------------------
 
+#include <string>
+#include <string_view>
 #include <type_traits>
 
 #include <doctest/doctest.h>
@@ -57,6 +59,11 @@ static_assert(static_cast<int>(ServiceLevel::EXPRESS_24H) <
 static_assert(static_cast<int>(ServiceLevel::PRIORITY) <
                   static_cast<int>(ServiceLevel::STANDARD),
               "PRIORITY debe ser mas urgente que STANDARD (SDD 5.3)");
+
+// --- toMessage es constexpr -----------------------------------------------
+// Permite usarlo en static_assert y en contextos de compilacion.
+static_assert(std::string_view(toMessage(OperationResult::OK)) == "Operacion completada",
+              "toMessage debe ser constexpr y cubrir OK");
 
 // --- Los tipos de valor son construibles por defecto ------------------------
 static_assert(std::is_default_constructible<Package>::value,
@@ -122,6 +129,33 @@ TEST_CASE("Client nace vacio")
     CHECK(client.address.city.empty());
     CHECK(client.address.exactAddress.empty());
     CHECK(client.address.postalCode.empty());
+}
+
+TEST_CASE("toMessage cubre los cinco valores de OperationResult (S1.5)")
+{
+    // Los mensajes son parte del contrato con el usuario: se fijan aqui para
+    // que un cambio de texto no pase desapercibido.
+    CHECK(std::string(toMessage(OperationResult::OK)) == "Operacion completada");
+    CHECK(std::string(toMessage(OperationResult::NOT_FOUND)) == "No encontrado");
+    CHECK(std::string(toMessage(OperationResult::DUPLICATE)) == "Ya existe");
+    CHECK(std::string(toMessage(OperationResult::INVALID_STATE)) == "Estado invalido");
+    CHECK(std::string(toMessage(OperationResult::INVALID_INPUT)) == "Entrada invalida");
+
+    // Dos codigos distintos no pueden mostrar el mismo texto: el usuario no
+    // sabria que ocurrio.
+    const OperationResult codes[] = {OperationResult::OK, OperationResult::NOT_FOUND,
+                                     OperationResult::DUPLICATE, OperationResult::INVALID_STATE,
+                                     OperationResult::INVALID_INPUT};
+
+    for (const OperationResult a : codes)
+    {
+        for (const OperationResult b : codes)
+        {
+            if (a == b)
+                continue;
+            CHECK(std::string(toMessage(a)) != std::string(toMessage(b)));
+        }
+    }
 }
 
 } // TEST_SUITE
