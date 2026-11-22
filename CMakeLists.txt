@@ -58,6 +58,7 @@ else()
 endif()
 
 add_library(nodedispatch_core STATIC
+    src/audit_log.cpp
     src/dispatch_cmp.cpp
     src/dispatch_queue.cpp
     src/geographic_hierarchy.cpp
@@ -98,6 +99,7 @@ if(BUILD_TESTING)
 
     # Suite principal: un solo ejecutable con todos los TEST_CASE del dominio.
     add_executable(nodedispatch_tests
+        tests/audit_log_test.cpp
         tests/doctest_main.cpp
         tests/dispatch_cmp_test.cpp
         tests/dispatch_queue_test.cpp
