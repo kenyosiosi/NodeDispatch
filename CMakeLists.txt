@@ -59,6 +59,7 @@ endif()
 
 add_library(nodedispatch_core STATIC
     src/dispatch_cmp.cpp
+    src/dispatch_queue.cpp
     src/geographic_hierarchy.cpp
     src/inventory_index.cpp
     src/tracking_engine.cpp)
@@ -99,6 +100,7 @@ if(BUILD_TESTING)
     add_executable(nodedispatch_tests
         tests/doctest_main.cpp
         tests/dispatch_cmp_test.cpp
+        tests/dispatch_queue_test.cpp
         tests/facade_test.cpp
         tests/framework_test.cpp
         tests/inventory_test.cpp
