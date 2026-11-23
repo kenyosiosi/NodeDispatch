@@ -246,6 +246,19 @@ enum class ReturnReason {
     CANCELLED
 };
 
+// --- Resultado de operaciones de la fachada (S1.3, S1.5) --------------------
+// La API publica no lanza excepciones de negocio: devuelve este codigo.
+enum class OperationResult {
+    OK,
+    NOT_FOUND,
+    DUPLICATE,
+    INVALID_STATE,
+    INVALID_INPUT
+};
+
+// Texto legible para el usuario, estable y sin excepciones.
+constexpr const char* toMessage(OperationResult result) noexcept;
+
 } // namespace nodedispatch
 ```
 
@@ -523,6 +536,10 @@ public:
 **Política de errores:** la API pública no lanza excepciones de negocio. Devuelve
 `bool` o `std::optional`. Las excepciones de DeSiGNAR (por ejemplo, `find` sobre una
 clave inexistente) se capturan en la fachada y se traducen a un resultado seguro.
+
+Los códigos de error son `OperationResult` (SDD 4.1). Para mensajes de usuario
+estable se usa `toMessage(OperationResult)` (S1.5), que es `constexpr` y
+`noexcept` y no asigna memoria.
 
 **Contratos:**
 

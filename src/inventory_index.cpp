@@ -78,6 +78,20 @@ std::size_t InventoryIndex::size(const std::string& agencyId) const
     return tree == nullptr ? 0U : static_cast<std::size_t>(tree->size());
 }
 
+bool InventoryIndex::verify() const
+{
+    for (auto it = index_.begin(); it != index_.end(); ++it)
+    {
+        const Tree* tree = Designar::value(*it);
+        if (tree != nullptr && !tree->verify())
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 std::size_t InventoryIndex::agencyCount() const
 {
     return static_cast<std::size_t>(index_.size());
