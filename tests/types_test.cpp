@@ -65,6 +65,40 @@ static_assert(static_cast<int>(ServiceLevel::PRIORITY) <
 static_assert(std::string_view(toMessage(OperationResult::OK)) == "Operacion completada",
               "toMessage debe ser constexpr y cubrir OK");
 
+// --- SDD 4.2 y 4.3: tipo de cada campo --------------------------------------
+// El texto va en std::string (los char[N] rompen HashMap: comparan direcciones)
+// y el dinero en centavos enteros. Si alguien cambia un campo por `double` o
+// por `char[]`, esto no compila.
+static_assert(std::is_same<decltype(Address::state), std::string>::value,
+              "Address::state debe ser std::string (SDD 4.3)");
+static_assert(std::is_same<decltype(Address::city), std::string>::value,
+              "Address::city debe ser std::string (SDD 4.3)");
+static_assert(std::is_same<decltype(Address::exactAddress), std::string>::value,
+              "Address::exactAddress debe ser std::string (SDD 4.3)");
+static_assert(std::is_same<decltype(Address::postalCode), std::string>::value,
+              "Address::postalCode debe ser std::string (SDD 4.3)");
+
+static_assert(std::is_same<decltype(Agency::id), std::string>::value,
+              "Agency::id debe ser std::string (SDD 4.2)");
+static_assert(std::is_same<decltype(Agency::parentId), std::string>::value,
+              "Agency::parentId debe ser std::string (SDD 4.2)");
+static_assert(std::is_same<decltype(Agency::location), Address>::value,
+              "Agency::location debe ser Address (SDD 4.2)");
+
+static_assert(std::is_same<decltype(Client::nationalId), std::string>::value,
+              "Client::nationalId debe ser std::string (SDD 4.2)");
+
+static_assert(std::is_same<decltype(Package::baseCents), std::int64_t>::value,
+              "Package::baseCents debe ser int64_t en centavos (SDD 4.3)");
+static_assert(std::is_same<decltype(Package::deliverySurchargeCents), std::int64_t>::value,
+              "Package::deliverySurchargeCents debe ser int64_t en centavos (SDD 4.3)");
+static_assert(std::is_same<decltype(Package::createdAt), std::int64_t>::value,
+              "Package::createdAt debe ser int64_t (SDD 4.2)");
+static_assert(std::is_same<decltype(Package::updatedAt), std::int64_t>::value,
+              "Package::updatedAt debe ser int64_t (SDD 4.2)");
+static_assert(std::is_same<decltype(Package::trackingCode), std::string>::value,
+              "Package::trackingCode debe ser std::string (SDD 4.2)");
+
 // --- Los tipos de valor son construibles por defecto ------------------------
 static_assert(std::is_default_constructible<Package>::value,
               "Package debe poder construirse por defecto");
@@ -156,6 +190,25 @@ TEST_CASE("toMessage cubre los cinco valores de OperationResult (S1.5)")
             CHECK(std::string(toMessage(a)) != std::string(toMessage(b)));
         }
     }
+}
+
+TEST_CASE("los structs del dominio mantienen el tamano documentado (S1.4)")
+{
+    // Cifras de referencia medidas en x86-64 con GCC 13.3 (std::string = 32 B):
+    // Address 128, Client 256, Agency 224, Package 192. El SDD 4.3 las recoge.
+    // Aqui se expresan en funcion de sizeof(std::string) para que valgan en
+    // cualquier ABI y sigan detectando un campo de mas o de menos.
+    MESSAGE("sizeof(Address)=" << sizeof(Address) << " Client=" << sizeof(Client)
+            << " Agency=" << sizeof(Agency) << " Package=" << sizeof(Package));
+
+    CHECK(sizeof(Address) == 4 * sizeof(std::string));
+    CHECK(sizeof(Client) == 8 * sizeof(std::string));
+    CHECK(sizeof(Agency) == 7 * sizeof(std::string));
+    CHECK(sizeof(Package) >= 4 * sizeof(std::string) + 2 * sizeof(std::int64_t));
+
+    // El peso es la unica magnitud en punto flotante del dominio (no es dinero).
+    static_assert(std::is_same<decltype(Package::weightKg), double>::value,
+                  "Package::weightKg debe ser double (SDD 4.2)");
 }
 
 } // TEST_SUITE

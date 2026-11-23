@@ -340,6 +340,12 @@ struct PackageEvent {
   `Package`. El inventario por agencia y la cola de despacho guardan **códigos de
   rastreo**, no copias completas.
 - **Niveles de servicio:** `enum class` en lugar de enteros mágicos.
+- **Tamaño de los structs (medido):** con `std::string` de 32 bytes en x86-64 y
+  GCC 13.3, `sizeof` da `Address` 128, `Client` 256, `Agency` 224 y `Package` 192.
+  Son cifras de referencia para estimar memoria, no un contrato: dependen de la
+  ABI. `tests/types_test.cpp` las comprueba en función de `sizeof(std::string)`,
+  así que siguen valiendo en otras plataformas y detectan un campo de más o de
+  menos.
 
 ---
 
