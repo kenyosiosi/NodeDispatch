@@ -58,6 +58,7 @@ else()
 endif()
 
 add_library(nodedispatch_core STATIC
+    src/client_index.cpp
     src/dispatch_cmp.cpp
     src/geographic_hierarchy.cpp
     src/inventory_index.cpp
@@ -97,6 +98,7 @@ if(BUILD_TESTING)
 
     # Suite principal: un solo ejecutable con todos los TEST_CASE del dominio.
     add_executable(nodedispatch_tests
+        tests/client_index_test.cpp
         tests/doctest_main.cpp
         tests/dispatch_cmp_test.cpp
         tests/facade_test.cpp
