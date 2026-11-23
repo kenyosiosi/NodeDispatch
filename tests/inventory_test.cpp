@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include <cstdint>
+
 #include <doctest/doctest.h>
 
 #include "nodedispatch/inventory_index.hpp"
@@ -140,4 +142,57 @@ TEST_CASE("InventoryIndex libera todo con clear y queda reutilizable")
     // Se puede volver a usar despues de clear().
     CHECK(inventory.add("AG-CCS", "ND-0003") == OperationResult::OK);
     CHECK(inventory.size("AG-CCS") == 1);
+}
+
+
+TEST_CASE("InventoryIndex conserva los invariantes rojo-negro (S2.4)")
+{
+    InventoryIndex index;
+
+    // Indice vacio: no hay arboles que verificar.
+    CHECK(index.verify());
+
+    // Generador congruencial lineal: determinista y sin <random>.
+    std::uint32_t state = 12345U;
+    auto next = [&state]() {
+        state = state * 1664525U + 1013904223U;
+        return state;
+    };
+
+    const char* agencies[] = {"AG-CCS", "AG-MAR", "AG-VAL"};
+
+    for (int i = 0; i < 5000; ++i)
+    {
+        const std::string code = "ND-" + std::to_string(100000 + (next() % 2000));
+        const std::string agency = agencies[next() % 3];
+
+        // Con 2000 codigos y 5000 altas hay repetidos: DUPLICATE es esperado.
+        const OperationResult result = index.add(agency, code);
+        REQUIRE((result == OperationResult::OK || result == OperationResult::DUPLICATE));
+    }
+
+    // Tras 5000 altas con codigos repetidos: los arboles siguen equilibrados.
+    CHECK(index.verify());
+
+    for (int i = 0; i < 1500; ++i)
+    {
+        const std::string code = "ND-" + std::to_string(100000 + (next() % 2000));
+        const std::string agency = agencies[next() % 3];
+        index.remove(agency, code); // puede no existir: no importa
+    }
+
+    CHECK(index.verify());
+
+    // Y el orden in-order sigue siendo ascendente en cada agencia.
+    for (const char* agency : agencies)
+    {
+        const auto codes = index.listSorted(agency);
+        for (std::size_t i = 1; i < codes.size(); ++i)
+        {
+            CHECK(codes[i - 1] < codes[i]);
+        }
+    }
+
+    index.clear();
+    CHECK(index.verify());
 }
