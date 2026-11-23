@@ -64,6 +64,12 @@ public:
 
     bool is_empty(const std::string& agencyId) const;
 
+    // Comprueba los invariantes del arbol rojo-negro de cada agencia (S2.4).
+    // RbTree::verify() valida orden BST, altura negra uniforme, raiz negra y
+    // ausencia de enlaces rojos a la derecha. Coste O(n) por agencia: es una
+    // comprobacion de pruebas y de diagnostico, no del camino caliente.
+    bool verify() const;
+
     // Libera todos los arboles.
     void clear();
 
