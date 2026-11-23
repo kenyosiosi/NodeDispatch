@@ -67,6 +67,28 @@ enum class OperationResult {
     INVALID_INPUT
 };
 
+// Texto para mostrar al usuario. Cubre los cinco valores y es constexpr para
+// poder usarse en pruebas y en mensajes de compilacion. Si se agrega un valor
+// nuevo al enum, el -Wswitch del build avisa de que falta su mensaje: no hay
+// `default` a proposito.
+constexpr const char* toMessage(OperationResult result) noexcept
+{
+    switch (result)
+    {
+    case OperationResult::OK:
+        return "Operacion completada";
+    case OperationResult::NOT_FOUND:
+        return "No encontrado";
+    case OperationResult::DUPLICATE:
+        return "Ya existe";
+    case OperationResult::INVALID_STATE:
+        return "Estado invalido";
+    case OperationResult::INVALID_INPUT:
+        return "Entrada invalida";
+    }
+    return "Resultado desconocido";
+}
+
 // --- Tipos de valor ---------------------------------------------------------
 struct Address {
     std::string state;
