@@ -61,7 +61,8 @@ add_library(nodedispatch_core STATIC
     src/client_index.cpp
     src/dispatch_cmp.cpp
     src/geographic_hierarchy.cpp
-    src/inventory_index.cpp)
+    src/inventory_index.cpp
+    src/tracking_code.cpp)
 target_include_directories(nodedispatch_core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
@@ -103,6 +104,7 @@ if(BUILD_TESTING)
         tests/facade_test.cpp
         tests/framework_test.cpp
         tests/inventory_test.cpp
+        tests/tracking_code_test.cpp
         tests/types_test.cpp)
     target_link_libraries(nodedispatch_tests PRIVATE
         nodedispatch_core nodedispatch_warnings doctest::doctest)
