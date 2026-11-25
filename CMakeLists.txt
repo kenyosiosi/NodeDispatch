@@ -88,6 +88,7 @@ endif()
 
 add_library(nodedispatch_core STATIC
     src/audit_log.cpp
+    src/node_dispatch.cpp
     src/client_index.cpp
     src/dispatch_cmp.cpp
     src/dispatch_queue.cpp
@@ -135,9 +136,11 @@ if(BUILD_TESTING)
         tests/doctest_main.cpp
         tests/dispatch_cmp_test.cpp
         tests/dispatch_queue_test.cpp
+        tests/doctest_main.cpp
         tests/facade_test.cpp
         tests/framework_test.cpp
         tests/inventory_test.cpp
+        tests/node_dispatch_test.cpp
         tests/tracking_code_test.cpp
         tests/tracking_engine_test.cpp
         tests/types_test.cpp)
