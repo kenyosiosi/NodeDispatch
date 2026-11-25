@@ -11,6 +11,8 @@
 #include <ctime>
 #include <string>
 
+#include "nodedispatch/agency_api.hpp"
+
 namespace nodedispatch {
 
 namespace {
@@ -58,20 +60,24 @@ const char* paymentStatusName(PaymentStatus status)
 } // namespace
 
 // --- Jerarquia ---------------------------------------------------------------
+// La traduccion al contrato publico vive en AgencyApi (S3.7), no aqui.
 
 bool NodeDispatch::addAgency(const Agency& agency, const std::string& parentId)
 {
-    return agencies_.addAgency(agency, parentId) == OperationResult::OK;
+    AgencyApi api(agencies_);
+    return api.addAgency(agency, parentId);
 }
 
 std::optional<Agency> NodeDispatch::findAgency(const std::string& id) const
 {
-    return agencies_.findAgency(id);
+    const AgencyApi api(agencies_);
+    return api.findAgency(id);
 }
 
 Designar::DynArray<Agency> NodeDispatch::listDescendants(const std::string& id) const
 {
-    return agencies_.descendants(id);
+    const AgencyApi api(agencies_);
+    return api.listDescendants(id);
 }
 
 // --- Clientes ----------------------------------------------------------------
