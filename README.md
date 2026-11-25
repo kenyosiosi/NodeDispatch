@@ -118,6 +118,30 @@ ctest --test-dir build -R "^unit\." --output-on-failure    # solo doctest
 
 El smoke test S1.0 (`smoke_test`) se mantiene como caso independiente de CTest.
 
+### 🎮 Demo SFML (S3.10, opcional)
+
+La demo grafica requiere SFML 2.6.x. Con `BUILD_SFML=ON` se compila el target
+`nodedispatch_gui` (3 pantallas: Registrar / Rastrear / Despachar; navegacion
+1/2/3 o Tab, ESC).
+
+**Dependencias del sistema (Ubuntu/Debian):**
+
+```bash
+sudo apt-get install -y \
+  libx11-dev libxrandr-dev libxcursor-dev libxi-dev \
+  libgl1-mesa-dev libfreetype6-dev libudev-dev
+```
+
+**Build local:**
+
+```bash
+cmake -S . -B build-gui -DCMAKE_BUILD_TYPE=Debug -DBUILD_SFML=ON
+cmake --build build-gui --target nodedispatch_gui --parallel 4
+./build-gui/nodedispatch_gui
+```
+
+El CI ejecuta este build en el job `build-gui` para detectar roturas.
+
 ## 🔄 Flujo de Trabajo Git (GitFlow)
 
 * **`main`**: rama estable de producción / entregas oficiales.
