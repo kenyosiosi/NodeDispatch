@@ -254,4 +254,87 @@ TEST_CASE("reportes: por estado, por agencia y ingresos (N3)")
     CHECK(f.app.totalRevenueCents() == 3000 + 1500 + 300);
 }
 
+TEST_CASE("packagesAtAgency lista solo lo que esta en la agencia y copia (S3.8)")
+{
+    Fixture f;
+    // La jerarquia admite una sola raiz: Valencia cuelga de Caracas.
+    REQUIRE(f.app.addAgency(makeAgency("AG-VAL", "Valencia"), "AG-CCS"));
+
+    REQUIRE(f.app.registerPackage(makePackage("ND-CCS", "AG-CCS", PaymentType::PREPAID,
+                                              DeliveryMethod::AGENCY_PICKUP,
+                                              PackageStatus::AT_LOCAL_AGENCY)));
+    REQUIRE(f.app.registerPackage(makePackage("ND-VAL", "AG-VAL", PaymentType::PREPAID,
+                                              DeliveryMethod::AGENCY_PICKUP,
+                                              PackageStatus::AT_LOCAL_AGENCY)));
+    // Registrado: fisicamente no esta en ninguna agencia todavia.
+    REQUIRE(f.app.registerPackage(makePackage("ND-REG")));
+
+    const auto caracas = f.app.packagesAtAgency("AG-CCS");
+    REQUIRE(caracas.size() == 1);
+    CHECK(caracas[0].trackingCode == "ND-CCS");
+
+    // Mutar la copia no altera el inventario interno.
+    auto copia = f.app.packagesAtAgency("AG-CCS");
+    REQUIRE(copia.size() == 1);
+    copia[0].status = PackageStatus::DELIVERED;
+    copia[0].baseCents = 1;
+
+    const auto despues = f.app.packagesAtAgency("AG-CCS");
+    REQUIRE(despues.size() == 1);
+    CHECK(despues[0].status == PackageStatus::AT_LOCAL_AGENCY);
+    CHECK(despues[0].baseCents == 1500);
+
+    CHECK(f.app.packagesAtAgency("AG-VAL").size() == 1);
+    CHECK(f.app.packagesAtAgency("AG-404").size() == 0);
+}
+
+TEST_CASE("packagesByStatus filtra por estado y copia (S3.8)")
+{
+    Fixture f;
+
+    REQUIRE(f.app.registerPackage(makePackage("ND-1")));
+    REQUIRE(f.app.registerPackage(makePackage("ND-2", "AG-CCS", PaymentType::PREPAID,
+                                              DeliveryMethod::AGENCY_PICKUP,
+                                              PackageStatus::AT_LOCAL_AGENCY)));
+    REQUIRE(f.app.registerPackage(makePackage("ND-3")));
+
+    const auto registrados = f.app.packagesByStatus(PackageStatus::REGISTERED);
+    REQUIRE(registrados.size() == 2);
+
+    // El orden no es parte del contrato: se comprueba pertenencia, no posicion.
+    bool tieneNd1 = false;
+    bool tieneNd3 = false;
+    for (std::size_t i = 0; i < registrados.size(); ++i)
+    {
+        tieneNd1 = tieneNd1 || registrados[i].trackingCode == "ND-1";
+        tieneNd3 = tieneNd3 || registrados[i].trackingCode == "ND-3";
+    }
+    CHECK(tieneNd1);
+    CHECK(tieneNd3);
+
+    CHECK(f.app.packagesByStatus(PackageStatus::AT_LOCAL_AGENCY).size() == 1);
+    CHECK(f.app.packagesByStatus(PackageStatus::DELIVERED).size() == 0);
+
+    // Mutar la copia no altera el estado interno.
+    auto copia = f.app.packagesByStatus(PackageStatus::REGISTERED);
+    REQUIRE(copia.size() == 2);
+    copia[0].status = PackageStatus::DELIVERED;
+
+    CHECK(f.app.packagesByStatus(PackageStatus::REGISTERED).size() == 2);
+    CHECK(f.app.packagesByStatus(PackageStatus::DELIVERED).size() == 0);
+}
+
+TEST_CASE("packagesByStatus sigue los cambios de estado (S3.8)")
+{
+    Fixture f;
+    REQUIRE(f.app.registerPackage(makePackage("ND-1")));
+
+    REQUIRE(f.app.updatePackageStatus("ND-1", PackageStatus::IN_TRANSIT));
+
+    CHECK(f.app.packagesByStatus(PackageStatus::REGISTERED).size() == 0);
+    const auto transito = f.app.packagesByStatus(PackageStatus::IN_TRANSIT);
+    REQUIRE(transito.size() == 1);
+    CHECK(transito[0].trackingCode == "ND-1");
+}
+
 } // TEST_SUITE
