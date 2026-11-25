@@ -67,6 +67,11 @@ public:
 
     void clear();
 
+    // Todos los paquetes, en orden de insercion del mapa. Lo usa la fachada
+    // para agregados (ingresos, reportes) que no se pueden responder por
+    // indice.
+    Designar::DynArray<Package> all() const;
+
     // Paquetes con ese estado, en orden de insercion del mapa (no ordenado).
     // La fachada ordena o filtra lo que necesite (S3.8).
     Designar::DynArray<Package> byStatus(PackageStatus status) const;

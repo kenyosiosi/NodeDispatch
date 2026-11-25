@@ -19,10 +19,11 @@
 // modo que un cambio de estado nunca puede quedar aplicado en un sitio y
 // desfasado en otro.
 //
-// Esta cabecera fija solo el CONTRATO: no declara miembros. La composicion de
-// los modulos (jerarquia, tracking, inventario, despacho y auditoria) se decide
-// en N3, cuando esos tipos existen. Declarar aqui miembros por valor de tipos
-// incompletos no compilaria.
+// La composicion de los modulos (jerarquia, clientes, tracking, inventario,
+// despacho, auditoria y generador de codigos) vive en el bloque privado: los
+// tipos ya existen y se guardan por valor, sin punteros ni propiedad manual.
+// La fachada no es copiable, y eso es deliberado: duplicarla duplicaria el
+// estado del sistema.
 //
 // Politica de errores (SDD 7): la API publica no lanza excepciones de negocio.
 // Las mutaciones devuelven bool; las consultas devuelven std::optional o una
@@ -37,8 +38,15 @@
 #include <array.hpp>
 
 #include "nodedispatch/agency.hpp"
+#include "nodedispatch/audit_log.hpp"
 #include "nodedispatch/client.hpp"
+#include "nodedispatch/client_index.hpp"
+#include "nodedispatch/dispatch_queue.hpp"
+#include "nodedispatch/geographic_hierarchy.hpp"
+#include "nodedispatch/inventory_index.hpp"
 #include "nodedispatch/package.hpp"
+#include "nodedispatch/tracking_code.hpp"
+#include "nodedispatch/tracking_engine.hpp"
 #include "nodedispatch/types.hpp"
 
 namespace nodedispatch {
@@ -106,6 +114,15 @@ public:
     // reconstruirlo. Una linea corrupta devuelve false sin abortar.
     bool save(const std::string& path) const;
     bool load(const std::string& path);
+
+private:
+    GeographicHierarchy agencies_;
+    ClientIndex clients_;
+    TrackingEngine packages_;
+    InventoryIndex inventory_;
+    PriorityDispatchQueue queues_;
+    AuditLog audit_;
+    TrackingCodeGenerator codes_;
 };
 
 } // namespace nodedispatch

@@ -139,6 +139,16 @@ void TrackingEngine::clear()
     index_.clear();
 }
 
+Designar::DynArray<Package> TrackingEngine::all() const
+{
+    Designar::DynArray<Package> out;
+    for (auto it = index_.begin(); it != index_.end(); ++it)
+    {
+        out.append(Designar::value(*it));
+    }
+    return out;
+}
+
 Designar::DynArray<Package> TrackingEngine::byStatus(PackageStatus status) const
 {
     Designar::DynArray<Package> out;
