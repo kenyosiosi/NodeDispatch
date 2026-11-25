@@ -37,6 +37,35 @@ FetchContent_Declare(Designar
 FetchContent_MakeAvailable(Designar)
 
 # -----------------------------------------------------------------------------
+# SFML opcional (S3.10): esqueleto de presentacion para la demo.
+# OFF por defecto: el nucleo no depende de SFML y el CI no lo requiere.
+# Si se activa, se descarga la version fijada igual que DeSiGNAR.
+# -----------------------------------------------------------------------------
+option(BUILD_SFML "Construir demo SFML (opcional)" OFF)
+
+if(BUILD_SFML)
+    message(STATUS "SFML habilitado: descargando version fijada...")
+    # Solo necesitamos graphics, window, system. Audio requiere OpenAL y no lo usamos.
+    set(SFML_BUILD_AUDIO        OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_DOC          OFF CACHE BOOL "" FORCE)
+    set(SFML_INSTALL_PKGCONFIG  OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(sfml
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG        2.6.1
+        GIT_PROGRESS   TRUE)
+
+    FetchContent_MakeAvailable(sfml)
+
+    # Tratar cabeceras de SFML como sistema para no ensuciar warnings propios.
+    if(TARGET sfml-graphics)
+        set_target_properties(sfml-graphics sfml-window sfml-system PROPERTIES
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${sfml_SOURCE_DIR}/include")
+    endif()
+endif()
+
+# -----------------------------------------------------------------------------
 # Nucleo de NodeDispatch
 #
 # Libreria estatica con los modulos implementados. Las cabeceras publicas se
@@ -130,4 +159,15 @@ if(BUILD_TESTING)
     add_executable(hierarchy_test tests/hierarchy_test.cpp)
     target_link_libraries(hierarchy_test PRIVATE nodedispatch_core nodedispatch_warnings)
     add_test(NAME hierarchy_test COMMAND hierarchy_test)
+endif()
+
+# -----------------------------------------------------------------------------
+# Demo SFML (S3.10): solo si BUILD_SFML=ON.
+# Vive en demo/ para no meter SFML ni punto flotante en el nucleo.
+# -----------------------------------------------------------------------------
+if(BUILD_SFML)
+    add_executable(nodedispatch_gui demo/sfml_demo.cpp)
+    target_link_libraries(nodedispatch_gui PRIVATE
+        nodedispatch_core nodedispatch_warnings
+        sfml-graphics sfml-window sfml-system)
 endif()
