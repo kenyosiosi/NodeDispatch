@@ -317,4 +317,28 @@ TEST_CASE("dispatchNextPackage solo saca paquetes elegibles de esa agencia (S3.5
     CHECK(valencia->trackingCode == "ND-VAL");
 }
 
+TEST_CASE("trackPackage devuelve copia segura del paquete (S3.2)")
+{
+    Fixture f;
+    REQUIRE(f.app.registerPackage(makePackage("ND-1")));
+
+    auto copia = f.app.trackPackage("ND-1");
+    REQUIRE(copia.has_value());
+    CHECK(copia->trackingCode == "ND-1");
+
+    // Modificar la copia no toca el estado interno de la fachada.
+    copia->status = PackageStatus::DELIVERED;
+    copia->receiverId = "V-404";
+    copia->baseCents = 999999;
+
+    const auto original = f.app.trackPackage("ND-1");
+    REQUIRE(original.has_value());
+    CHECK(original->status == PackageStatus::REGISTERED);
+    CHECK(original->receiverId == "V-2");
+    CHECK(original->baseCents == 1500);
+
+    // Miss: codigo inexistente devuelve nullopt, nunca un puntero.
+    CHECK_FALSE(f.app.trackPackage("ND-404").has_value());
+}
+
 } // TEST_SUITE
