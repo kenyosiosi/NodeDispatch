@@ -337,6 +337,69 @@ TEST_CASE("packagesByStatus sigue los cambios de estado (S3.8)")
     CHECK(transito[0].trackingCode == "ND-1");
 }
 
+TEST_CASE("dispatchNextPackage respeta el orden EXPRESS-PRIORITY-STANDARD (S3.5)")
+{
+    Fixture f;
+
+    Package standard = makePackage("ND-STD", "AG-CCS", PaymentType::PREPAID,
+                                   DeliveryMethod::AGENCY_PICKUP,
+                                   PackageStatus::AT_LOCAL_AGENCY);
+    standard.serviceLevel = ServiceLevel::STANDARD;
+    standard.createdAt = 1795000001; // el mas viejo: FIFO lo pondria primero
+    REQUIRE(f.app.registerPackage(standard));
+
+    Package priority = makePackage("ND-PRI", "AG-CCS", PaymentType::PREPAID,
+                                   DeliveryMethod::AGENCY_PICKUP,
+                                   PackageStatus::AT_LOCAL_AGENCY);
+    priority.serviceLevel = ServiceLevel::PRIORITY;
+    priority.createdAt = 1795000002;
+    REQUIRE(f.app.registerPackage(priority));
+
+    Package express = makePackage("ND-EXP", "AG-CCS", PaymentType::PREPAID,
+                                  DeliveryMethod::AGENCY_PICKUP,
+                                  PackageStatus::AT_LOCAL_AGENCY);
+    express.serviceLevel = ServiceLevel::EXPRESS_24H;
+    express.createdAt = 1795000003; // el mas nuevo: aun asi sale primero
+    REQUIRE(f.app.registerPackage(express));
+
+    const auto first = f.app.dispatchNextPackage("AG-CCS");
+    REQUIRE(first.has_value());
+    CHECK(first->trackingCode == "ND-EXP");
+
+    const auto second = f.app.dispatchNextPackage("AG-CCS");
+    REQUIRE(second.has_value());
+    CHECK(second->trackingCode == "ND-PRI");
+
+    const auto third = f.app.dispatchNextPackage("AG-CCS");
+    REQUIRE(third.has_value());
+    CHECK(third->trackingCode == "ND-STD");
+
+    CHECK_FALSE(f.app.dispatchNextPackage("AG-CCS").has_value());
+}
+
+TEST_CASE("dispatchNextPackage solo saca paquetes elegibles de esa agencia (S3.5)")
+{
+    Fixture f;
+    // La jerarquia admite una sola raiz: Valencia cuelga de Caracas.
+    REQUIRE(f.app.addAgency(makeAgency("AG-VAL", "Valencia"), "AG-CCS"));
+
+    // Registrado: todavia no esta en la agencia, asi que no es despachable.
+    REQUIRE(f.app.registerPackage(makePackage("ND-REG")));
+
+    // En la agencia correcta, pero de otra ciudad.
+    REQUIRE(f.app.registerPackage(makePackage("ND-VAL", "AG-VAL", PaymentType::PREPAID,
+                                              DeliveryMethod::AGENCY_PICKUP,
+                                              PackageStatus::AT_LOCAL_AGENCY)));
+
+    // Caracas no tiene nada elegible y una agencia inexistente devuelve nullopt.
+    CHECK_FALSE(f.app.dispatchNextPackage("AG-CCS").has_value());
+    CHECK_FALSE(f.app.dispatchNextPackage("AG-404").has_value());
+
+    const auto valencia = f.app.dispatchNextPackage("AG-VAL");
+    REQUIRE(valencia.has_value());
+    CHECK(valencia->trackingCode == "ND-VAL");
+}
+
 TEST_CASE("trackPackage devuelve copia segura del paquete (S3.2)")
 {
     Fixture f;
