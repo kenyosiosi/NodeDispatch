@@ -141,6 +141,7 @@ if(BUILD_TESTING)
         tests/fachada_estados_test.cpp
         tests/finanzas_test.cpp
         tests/framework_test.cpp
+        tests/hierarchy_test.cpp
         tests/inventory_test.cpp
         tests/node_dispatch_test.cpp
         tests/registro_test.cpp
@@ -160,9 +161,6 @@ if(BUILD_TESTING)
     target_link_libraries(smoke_test PRIVATE nodedispatch_core nodedispatch_warnings)
     add_test(NAME smoke_test COMMAND smoke_test)
 
-    add_executable(hierarchy_test tests/hierarchy_test.cpp)
-    target_link_libraries(hierarchy_test PRIVATE nodedispatch_core nodedispatch_warnings)
-    add_test(NAME hierarchy_test COMMAND hierarchy_test)
 endif()
 
 # -----------------------------------------------------------------------------
