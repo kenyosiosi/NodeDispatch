@@ -1,0 +1,43 @@
+# Guion de demostracion de la CLI (S3.11).
+# Lo ejecuta CTest (cli_demo) y scripts/demo.sh, para que el transcript sea
+# reproducible: mismas ordenes, misma salida, sin tocar el codigo.
+#
+# Token " - " como padre significa agencia raiz.
+# Niveles: EXPRESS (1), PRIORITY (2), STANDARD (3, por defecto).
+
+client add V-1 Ana Perez
+client add V-2 Luis Gomez
+
+agency add AG-CCS - Caracas
+agency add AG-CCS-CH AG-CCS Chacao
+agency add AG-VAL AG-CCS Valencia
+agency tree AG-CCS
+
+# Retiro en agencia, prepago y express: llega y se entrega.
+package register ND-000001 AG-CCS-CH V-1 V-2 1500 PREPAID AGENCY EXPRESS
+package track ND-000001
+package status ND-000001 IN_TRANSIT
+package status ND-000001 AT_LOCAL_AGENCY
+package dispatch AG-CCS-CH
+package track ND-000001
+
+# Cobro Destino a domicilio: no sale hasta que se pague.
+package register ND-000002 AG-CCS V-1 V-2 2000 COD HOME PRIORITY
+package status ND-000002 IN_TRANSIT
+package status ND-000002 AT_LOCAL_AGENCY
+package dispatch AG-CCS
+package pay ND-000002 PAID
+package dispatch AG-CCS
+package track ND-000002
+
+# Reportes.
+report revenue
+report status DELIVERED
+report status AT_LOCAL_AGENCY
+report agency AG-CCS
+
+# Persistencia: contrato de la fachada presente, implementacion en S4.2.
+save /tmp/nodedispatch-demo.nd1
+load /tmp/nodedispatch-demo.nd1
+
+quit
