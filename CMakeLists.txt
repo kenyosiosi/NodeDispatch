@@ -61,7 +61,7 @@ if(BUILD_SFML)
     # Tratar cabeceras de SFML como sistema para no ensuciar warnings propios.
     if(TARGET sfml-graphics)
         set_target_properties(sfml-graphics sfml-window sfml-system PROPERTIES
-            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${sfml_SOURCE_DIR}/include")
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${sfml_SOURCE_DIR}/include>")
     endif()
 endif()
 
@@ -76,12 +76,14 @@ endif()
 # que sus propias advertencias no ensucien el build de NodeDispatch.
 if(DEFINED designar_SOURCE_DIR)
     set_target_properties(Designar PROPERTIES
-        INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${designar_SOURCE_DIR}/include")
+        INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${designar_SOURCE_DIR}/include>")
 endif()
 
 add_library(nodedispatch_warnings INTERFACE)
 if(MSVC)
-    target_compile_options(nodedispatch_warnings INTERFACE /W4)
+    # /utf-8 evita C4819 con los comentarios en español y fija la codificacion
+    # de los literales (MSVC asume la pagina de codigo activa del sistema).
+    target_compile_options(nodedispatch_warnings INTERFACE /W4 /utf-8)
 else()
     target_compile_options(nodedispatch_warnings INTERFACE -Wall -Wextra -Wpedantic)
 endif()
@@ -126,7 +128,7 @@ if(BUILD_TESTING)
     # que sus propias advertencias no ensucien el build de NodeDispatch.
     if(TARGET doctest)
         set_target_properties(doctest PROPERTIES
-            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${doctest_SOURCE_DIR}")
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${doctest_SOURCE_DIR}>")
     endif()
 
     # Suite principal: un solo ejecutable con todos los TEST_CASE del dominio.

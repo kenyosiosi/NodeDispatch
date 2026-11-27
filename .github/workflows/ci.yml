@@ -83,3 +83,46 @@ jobs:
 
       - name: Compilar GUI
         run: cmake --build build-gui --target nodedispatch_gui --parallel 4
+
+  # Verificacion de portabilidad: el job de arriba se queda intacto porque su
+  # nombre es el check requerido por la proteccion de ramas. Esta matriz anade
+  # macOS y Windows (MSVC en los runners de GitHub) sin tocar ese check.
+  # `shell: bash` funciona en los tres sistemas: Git Bash esta en los runners
+  # de Windows, y `--config Debug` / `-C Debug` se ignoran en generadores
+  # de una sola configuracion (Makefiles), asi que los comandos son identicos.
+  cross-platform:
+    name: cross-platform (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2022]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Versiones del toolchain
+        shell: bash
+        run: |
+          cmake --version
+          # En Windows `cl.exe` no esta en el PATH de Git Bash: CMake configura
+          # el entorno de Visual Studio por dentro, asi que imprimimos lo que
+          # exista y no fallamos si falta alguno de los dos compiladores.
+          c++ --version 2>/dev/null | head -n 1 || true
+          cl.exe 2>/dev/null | head -n 1 || true
+
+      - name: Configurar
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Compilar
+        shell: bash
+        run: cmake --build build --parallel 4 --config Debug
+
+      - name: Probar
+        shell: bash
+        run: ctest --test-dir build -C Debug --output-on-failure
