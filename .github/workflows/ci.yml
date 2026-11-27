@@ -51,3 +51,35 @@ jobs:
 
       - name: Probar
         run: ctest --test-dir build --output-on-failure
+
+  # Job opcional con SFML habilitado: compila el target nodedispatch_gui
+  # para detectar roturas de la demo grafica (S3.10). Requiere dependencias
+  # del sistema que ubuntu-24.04 trae en los paquetes listados abajo.
+  build-gui:
+    name: build-gui (SFML)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Instalar deps SFML
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libgl1-mesa-dev libfreetype6-dev libudev-dev
+
+      - name: Versiones del toolchain
+        run: |
+          cmake --version
+          g++ --version | head -n 1
+
+      - name: Configurar con SFML
+        run: cmake -S . -B build-gui -DCMAKE_BUILD_TYPE=Debug -DBUILD_SFML=ON
+
+      - name: Compilar GUI
+        run: cmake --build build-gui --target nodedispatch_gui --parallel 4
