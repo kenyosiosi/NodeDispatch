@@ -136,6 +136,7 @@ if(BUILD_TESTING)
         tests/dispatch_cmp_test.cpp
         tests/dispatch_queue_test.cpp
         tests/doctest_main.cpp
+        tests/e2e_test.cpp
         tests/facade_test.cpp
         tests/fachada_estados_test.cpp
         tests/finanzas_test.cpp
