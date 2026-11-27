@@ -134,6 +134,7 @@ if(BUILD_TESTING)
         tests/audit_log_test.cpp
         tests/client_index_test.cpp
         tests/doctest_main.cpp
+        tests/e2e_test.cpp
         tests/fachada_estados_test.cpp
         tests/registro_test.cpp
         tests/transitions_test.cpp
