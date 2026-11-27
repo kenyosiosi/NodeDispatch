@@ -85,4 +85,12 @@ private:
 // misma tabla en vez de duplicarla.
 bool isTransitionAllowed(PackageStatus from, PackageStatus to);
 
+// Regla completa del SDD 5.1 y 5.2 en una sola funcion: la tabla de estados
+// mas las dos condiciones que dependen del paquete.
+//   * AT_LOCAL_AGENCY -> OUT_FOR_DELIVERY solo con HOME_DELIVERY
+//   * -> DELIVERED exige pago en estado PAID (los prepagos ya nacen PAID)
+// updateStatus delega aqui, y la fachada y las pruebas usan el mismo criterio.
+bool canTransition(PackageStatus from, PackageStatus to,
+                   PaymentStatus paymentStatus, DeliveryMethod deliveryMethod);
+
 } // namespace nodedispatch

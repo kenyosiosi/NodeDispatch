@@ -6,17 +6,8 @@
 
 namespace nodedispatch {
 
-namespace {
-
-// Regla del SDD 5.2: un paquete con Cobro Destino solo se entrega pagado. Los
-// prepagados ya nacen PAID, asi que la condicion se cumple siempre.
-bool paymentAllowsDelivery(const Package& package)
-{
-    return package.paymentType == PaymentType::PREPAID ||
-           package.paymentStatus == PaymentStatus::PAID;
-}
-
-} // namespace
+// La regla de pago vive ahora en canTransition(), junto a la tabla de estados:
+// un solo sitio para las dos condiciones del SDD 5.2.
 
 bool isTransitionAllowed(PackageStatus from, PackageStatus to)
 {
@@ -36,6 +27,28 @@ bool isTransitionAllowed(PackageStatus from, PackageStatus to)
         return false; // estados terminales
     }
     return false;
+}
+
+bool canTransition(PackageStatus from, PackageStatus to,
+                   PaymentStatus paymentStatus, DeliveryMethod deliveryMethod)
+{
+    if (!isTransitionAllowed(from, to))
+    {
+        return false;
+    }
+
+    if (to == PackageStatus::OUT_FOR_DELIVERY &&
+        deliveryMethod != DeliveryMethod::HOME_DELIVERY)
+    {
+        return false;
+    }
+
+    if (to == PackageStatus::DELIVERED && paymentStatus != PaymentStatus::PAID)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 OperationResult TrackingEngine::add(const Package& package)
@@ -84,19 +97,9 @@ OperationResult TrackingEngine::updateStatus(const std::string& trackingCode,
         return OperationResult::NOT_FOUND;
     }
 
-    if (!isTransitionAllowed(package->status, status))
-    {
-        return OperationResult::INVALID_STATE;
-    }
-
-    // Condiciones de la tabla 5.1.
-    if (status == PackageStatus::OUT_FOR_DELIVERY &&
-        package->deliveryMethod != DeliveryMethod::HOME_DELIVERY)
-    {
-        return OperationResult::INVALID_STATE;
-    }
-
-    if (status == PackageStatus::DELIVERED && !paymentAllowsDelivery(*package))
+    // Tabla 5.1 y reglas del 5.2 en un solo sitio.
+    if (!canTransition(package->status, status, package->paymentStatus,
+                       package->deliveryMethod))
     {
         return OperationResult::INVALID_STATE;
     }
