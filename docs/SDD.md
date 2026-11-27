@@ -449,8 +449,11 @@ cuyo paquete ya no esté `AT_LOCAL_AGENCY` o no pertenezca a la agencia solicita
 - **Estructura:** por cada agencia, un `TreeMap` con backend `RbTree` (o un
   `RbTree<std::string>` si solo se almacenan códigos).
 - **Operaciones:** `add(code)`, `remove(code)`, `contains(code)`, `listSorted()`.
-- **Uso:** el inventario guarda los códigos de los paquetes cuya agencia destino es
-  esa agencia. El estado real del paquete se consulta en `TrackingEngine`.
+- **Uso:** el inventario guarda los códigos de los paquetes que están **físicamente**
+  en esa agencia, es decir, los que están en estado `AT_LOCAL_AGENCY`. Es una
+  consulta de stock presente, no una previsión por destino: coincide con lo que
+  `packagesAtAgency` lista y con lo único que `dispatchNextPackage` puede sacar
+  (§5.1 y §6.4). El estado real del paquete se consulta en `TrackingEngine`.
 - **Orden:** el recorrido in-order del árbol entrega el inventario ordenado por
   código de rastreo.
 
