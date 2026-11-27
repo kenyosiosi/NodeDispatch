@@ -134,6 +134,7 @@ if(BUILD_TESTING)
         tests/audit_log_test.cpp
         tests/client_index_test.cpp
         tests/doctest_main.cpp
+        tests/finanzas_test.cpp
         tests/dispatch_cmp_test.cpp
         tests/dispatch_queue_test.cpp
         tests/doctest_main.cpp
