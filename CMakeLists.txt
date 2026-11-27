@@ -179,6 +179,15 @@ if(BUILD_TESTING)
     add_test(NAME cli_demo
         COMMAND nodedispatch_cli --script
                 "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cli_demo.txt")
+
+    # S3.11: guion de regresion con los rechazos del contrato y la norma COD.
+    # La CLI no distingue exit codes por comando, asi que se fija la salida
+    # esperado con expresiones regulares: cada una debe aparecer en el transcript.
+    add_test(NAME cli_edge_cases
+        COMMAND nodedispatch_cli --script
+                "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cli_edge_cases.txt")
+    set_tests_properties(cli_edge_cases PROPERTIES
+        PASS_REGULAR_EXPRESSION "OK client add V-1;OK agency add AG-CCS-CH;pago=PAID agencia=AG-CCS-CH totalCents=1500;pago=PENDING agencia=AG-CCS-CH totalCents=2300;ERROR package register ND-900001;ERROR package register ND-900003;ERROR package register ND-900004;ERROR package register ND-900005;ERROR package register ND-900006;ERROR package register ND-900009;ERROR package track ND-999999;ERROR package pay ND-999999;ERROR package pay: estado invalido;ERROR package status: estado invalido;ERROR package status ND-900001 DELIVERED;OK package cancel ND-900001;ERROR package cancel ND-900001;ERROR package dispatch AG-NOEXISTE;ERROR agency tree AG-NOEXISTE;ERROR report status: estado invalido;ERROR save no implementado;ERROR load no implementado")
 endif()
 
 # -----------------------------------------------------------------------------

@@ -1,0 +1,45 @@
+# Guion de regresion de la CLI (S3.11).
+# Lo ejecuta CTest como `cli_edge_cases`. Comprueba normalizacion de pago,
+# rechazos del contrato de registro, transiciones invalidas y stubs de S4.
+# La salida esperada se fija con PASS_REGULAR_EXPRESSION en CMakeLists.txt.
+
+# --- Base: estas ordenes deben terminar en OK ---
+client add V-1 Ana Perez
+client add V-2 Luis Gomez
+agency add AG-CCS - Caracas
+agency add AG-CCS-CH AG-CCS Chacao
+
+# --- Normalizacion: PREPAID => PAID, COD => PENDING (con recargo) ---
+package register ND-900001 AG-CCS-CH V-1 V-2 1500 PREPAID AGENCY EXPRESS
+package track ND-900001
+package register ND-900002 AG-CCS-CH V-1 V-2 2000 COD HOME PRIORITY
+package track ND-900002
+
+# --- Rechazos de registerPackage (SDD 5.2) ---
+package register ND-900001 AG-CCS-CH V-1 V-2 1500 PREPAID AGENCY
+package register ND-900003 AG-CCS-CH V-1 V-2 -1 PREPAID AGENCY
+package register ND-900004 AG-NOEXISTE V-1 V-2 100 PREPAID AGENCY
+package register ND-900005 AG-CCS-CH V-NOEXISTE V-2 100 PREPAID AGENCY
+package register ND-900006 AG-CCS-CH V-1 V-NOEXISTE 100 PREPAID AGENCY
+package register ND-900007 AG-CCS-CH V-1 V-2 100 PREPAID AGENCY INVALido
+package register ND-900008 AG-CCS-CH V-1 V-2 100 INVALido AGENCY
+package register ND-900009 AG-CCS-CH V-1 V-2 100 PREPAID INVALido
+
+# --- Consultas, estados y transiciones invalidas ---
+package track ND-999999
+package pay ND-999999 PAID
+package pay ND-900001 INVALido
+package status ND-900001 INVALido
+package status ND-900001 DELIVERED
+package cancel ND-900001
+package cancel ND-900001
+package dispatch AG-NOEXISTE
+agency tree AG-NOEXISTE
+report status INVALido
+report agency AG-NOEXISTE
+
+# --- Persistencia: contrato presente, implementacion pendiente S4 ---
+save /tmp/nodedispatch-edge.nd1
+load /tmp/nodedispatch-edge.nd1
+
+quit
