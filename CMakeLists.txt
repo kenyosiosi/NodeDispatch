@@ -163,6 +163,22 @@ if(BUILD_TESTING)
 endif()
 
 # -----------------------------------------------------------------------------
+# CLI (S3.11): presentacion obligatoria del MVP (SDD 6.7).
+# Lee un guion de ordenes por stdin o con --script <archivo>, para que
+# scripts/demo.sh produzca un transcript reproducible.
+# -----------------------------------------------------------------------------
+add_executable(nodedispatch_cli src/cli_main.cpp)
+target_link_libraries(nodedispatch_cli PRIVATE nodedispatch_core nodedispatch_warnings)
+
+if(BUILD_TESTING)
+    # Recorrido completo de la CLI sobre un guion fijo: si algo del dominio se
+    # rompe, la demo deja de correr y este test falla.
+    add_test(NAME cli_demo
+        COMMAND nodedispatch_cli --script
+                "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cli_demo.txt")
+endif()
+
+# -----------------------------------------------------------------------------
 # Demo SFML (S3.10): solo si BUILD_SFML=ON.
 # Vive en demo/ para no meter SFML ni punto flotante en el nucleo.
 # -----------------------------------------------------------------------------
