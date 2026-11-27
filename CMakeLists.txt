@@ -133,20 +133,19 @@ if(BUILD_TESTING)
     add_executable(nodedispatch_tests
         tests/audit_log_test.cpp
         tests/client_index_test.cpp
-        tests/doctest_main.cpp
-        tests/fachada_estados_test.cpp
-        tests/registro_test.cpp
-        tests/transitions_test.cpp
-        tests/finanzas_test.cpp
         tests/dispatch_cmp_test.cpp
         tests/dispatch_queue_test.cpp
         tests/doctest_main.cpp
         tests/facade_test.cpp
+        tests/fachada_estados_test.cpp
+        tests/finanzas_test.cpp
         tests/framework_test.cpp
         tests/inventory_test.cpp
         tests/node_dispatch_test.cpp
+        tests/registro_test.cpp
         tests/tracking_code_test.cpp
         tests/tracking_engine_test.cpp
+        tests/transitions_test.cpp
         tests/types_test.cpp)
     target_link_libraries(nodedispatch_tests PRIVATE
         nodedispatch_core nodedispatch_warnings doctest::doctest)
