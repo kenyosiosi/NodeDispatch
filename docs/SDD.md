@@ -449,8 +449,10 @@ cuyo paquete ya no esté `AT_LOCAL_AGENCY` o no pertenezca a la agencia solicita
 - **Estructura:** por cada agencia, un `TreeMap` con backend `RbTree` (o un
   `RbTree<std::string>` si solo se almacenan códigos).
 - **Operaciones:** `add(code)`, `remove(code)`, `contains(code)`, `listSorted()`.
-- **Uso:** el inventario guarda los códigos de los paquetes cuya agencia destino es
-  esa agencia. El estado real del paquete se consulta en `TrackingEngine`.
+- **Uso:** el inventario guarda los códigos de los paquetes que están
+  **físicamente** en esa agencia (estado `AT_LOCAL_AGENCY`), no los que solo la
+  tienen como destino. Un paquete `REGISTERED` o `IN_TRANSIT` aún no ocupa
+  inventario. El estado real del paquete se consulta en `TrackingEngine`.
 - **Orden:** el recorrido in-order del árbol entrega el inventario ordenado por
   código de rastreo.
 
@@ -546,8 +548,13 @@ estable se usa `toMessage(OperationResult)` (S1.5), que es `constexpr` y
 - `registerPackage`: rechaza códigos duplicados, peso $\le 0$, importes negativos,
   agencia destino inexistente o cliente no registrado.
 - `updatePackageStatus`: valida la transición según la tabla 5.1 y la regla 5.2.
+  Las transiciones nombradas (`OUT_FOR_DELIVERY`, `DELIVERED`, `RETURNED`) se
+  hacen por aquí: no hay métodos `mark*` separados en la fachada. El criterio
+  vive una sola vez en `canTransition()` (`TrackingEngine`).
 - `dispatchNextPackage`: solo extrae paquetes `AT_LOCAL_AGENCY` de la agencia
   indicada; actualiza el estado y el historial antes de devolver la copia.
+- `totalCents(package)`: base más recargo de última milla solo en
+  `HOME_DELIVERY`, en centavos enteros. `totalRevenueCents()` la reutiliza.
 - Ninguna función devuelve punteros o referencias a memoria interna.
 
 ---
