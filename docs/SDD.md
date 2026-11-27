@@ -549,8 +549,13 @@ estable se usa `toMessage(OperationResult)` (S1.5), que es `constexpr` y
 - `registerPackage`: rechaza códigos duplicados, peso $\le 0$, importes negativos,
   agencia destino inexistente o cliente no registrado.
 - `updatePackageStatus`: valida la transición según la tabla 5.1 y la regla 5.2.
+  Las transiciones nombradas (`OUT_FOR_DELIVERY`, `DELIVERED`, `RETURNED`) se
+  hacen por aquí: no hay métodos `mark*` separados en la fachada. El criterio
+  vive una sola vez en `canTransition()` (`TrackingEngine`).
 - `dispatchNextPackage`: solo extrae paquetes `AT_LOCAL_AGENCY` de la agencia
   indicada; actualiza el estado y el historial antes de devolver la copia.
+- `totalCents(package)`: base más recargo de última milla solo en
+  `HOME_DELIVERY`, en centavos enteros. `totalRevenueCents()` la reutiliza.
 - Ninguna función devuelve punteros o referencias a memoria interna.
 
 ---
