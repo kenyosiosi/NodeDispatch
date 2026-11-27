@@ -128,7 +128,8 @@ apunte hacia adelante:
 Las colas de despacho **no se serializan**: se reconstruyen a partir de los
 paquetes cuyo `status` es `AT_LOCAL_AGENCY`, con el mismo criterio que
 `dispatchNextPackage` (SDD §5.3). El inventario por agencia se reconstruye igual,
-a partir de `targetAgencyId`.
+a partir de `targetAgencyId`, pero **solo con los paquetes en `AT_LOCAL_AGENCY`**:
+el inventario es stock presente, no previsión por destino (SDD §6.3).
 
 ## 5. Política de error
 
