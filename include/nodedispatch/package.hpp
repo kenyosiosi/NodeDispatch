@@ -41,6 +41,19 @@ struct Package {
     std::int64_t updatedAt = 0;  // Ultima modificacion
 };
 
+// Importe total del paquete en centavos (SDD 5.2): el recargo de ultima milla
+// solo se cobra en entrega a domicilio. Vive aqui, y no en la fachada, para que
+// el calculo exista una sola vez.
+inline std::int64_t totalCents(const Package& package)
+{
+    const std::int64_t surcharge =
+        package.deliveryMethod == DeliveryMethod::HOME_DELIVERY
+            ? package.deliverySurchargeCents
+            : 0;
+
+    return package.baseCents + surcharge;
+}
+
 // Entrada de la cola de prioridad. Guarda solo el codigo: el estado real se
 // consulta en el TrackingEngine (eliminacion perezosa de entradas obsoletas).
 struct DispatchEntry {

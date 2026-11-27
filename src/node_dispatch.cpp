@@ -314,11 +314,7 @@ std::int64_t NodeDispatch::totalRevenueCents() const
             continue; // solo se cobra lo efectivamente pagado
         }
 
-        total += package.baseCents;
-        if (package.deliveryMethod == DeliveryMethod::HOME_DELIVERY)
-        {
-            total += package.deliverySurchargeCents;
-        }
+        total += totalCents(package);
     }
 
     return total;
